@@ -1,0 +1,12 @@
+node_modules/
+dist/
+deliverables/
+.vscode-test/
+*.vsix
+*.log
+integration-user*
+coverage/
+.env*
+*.tsbuildinfo
+.DS_Store
+Thumbs.db

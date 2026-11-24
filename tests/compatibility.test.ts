@@ -1,0 +1,21 @@
+import {test,expect} from 'bun:test';
+import {readFileSync} from 'node:fs';
+import {installRuntimeCompatibility} from '../src/core/runtime';
+const {satisfies}=require('semver');
+test('native settings link targets the contributed and registered management command',()=>{
+ const pkg=JSON.parse(readFileSync(__dirname+'/../package.json','utf8'));
+ const properties=pkg.contributes.configuration.properties;
+ expect(Object.keys(properties)).toEqual(['gatewaySync.intervalMinutes']);
+ const setting=properties['gatewaySync.intervalMinutes'];
+ expect(setting.type).toBe('number');expect(setting.default).toBe(60);expect(setting.minimum).toBe(5);expect(setting.maximum).toBe(1440);
+ expect(setting.description).toBeUndefined();
+ expect(setting.markdownDescription.match(/\]\(command:([^)]*)\)/g)).toEqual(['](command:gatewaySync.open)']);
+ expect(setting.markdownDescription).toContain('当前不控制自动刷新');expect(setting.markdownDescription).toContain('按供应商配置');
+ expect(pkg.contributes.commands.some((c:any)=>c.command==='gatewaySync.open')).toBe(true);
+ expect(pkg.activationEvents).toContain('onCommand:gatewaySync.open');
+ const source=readFileSync(__dirname+'/../src/extension.ts','utf8');expect(source).toContain("registerCommand('gatewaySync.open',open)");
+ const host=readFileSync(__dirname+'/../tools/host-test.cjs','utf8');expect(host).toContain("assert.equal(ext.packageJSON.version,'"+pkg.version+"')");
+});
+test('manifest accepts legacy and current VS Code, rejects below supported floor',()=>{const pkg=JSON.parse(readFileSync(__dirname+'/../package.json','utf8'));for(const version of ['1.80.0','1.85.2','1.100.0','1.135.0','1.139.1'])expect(satisfies(version,pkg.engines.vscode)).toBe(true);expect(satisfies('1.79.0',pkg.engines.vscode)).toBe(false);});
+test('missing web globals get bundled implementations; existing globals preserved',()=>{const target:any={};installRuntimeCompatibility(target);expect(typeof target.fetch).toBe('function');const original={a:undefined,b:[1,2]};const copy=target.structuredClone(original);expect(copy).toEqual(original);expect(copy).not.toBe(original);const existing:any={fetch:()=>{},structuredClone:()=>{}};const before={...existing};installRuntimeCompatibility(existing);expect(existing).toEqual(before);});
+test('fallback HTTP supports loopback and refuses redirects without leaking authorization',async()=>{let leaked=false;const target:any={};installRuntimeCompatibility(target);const destination=Bun.serve({hostname:'127.0.0.1',port:0,fetch(){leaked=true;return new Response('bad');}});const server=Bun.serve({hostname:'127.0.0.1',port:0,fetch(req){return new URL(req.url).pathname==='/redirect'?Response.redirect(`http://127.0.0.1:${destination.port}`,302):Response.json({ok:true});}});try{const r=await target.fetch(`http://127.0.0.1:${server.port}`,{redirect:'error'});expect(await r.json()).toEqual({ok:true});await expect(target.fetch(`http://127.0.0.1:${server.port}/redirect`,{headers:{Authorization:'Bearer fake'},redirect:'error'})).rejects.toThrow();expect(leaked).toBe(false);}finally{server.stop(true);destination.stop(true);}});
