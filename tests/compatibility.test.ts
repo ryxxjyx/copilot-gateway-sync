@@ -2,6 +2,18 @@ import {test,expect} from 'bun:test';
 import {readFileSync} from 'node:fs';
 import {installRuntimeCompatibility} from '../src/core/runtime';
 const {satisfies}=require('semver');
+test('Marketplace identity and links match the release and isolated host',()=>{
+ const pkg=JSON.parse(readFileSync(__dirname+'/../package.json','utf8'));
+ expect(pkg.publisher).toBe('jiangyx');expect(pkg.name).toBe('copilot-gateway-sync');expect(pkg.version).toBe('0.4.5');
+ expect(pkg.repository).toEqual({type:'git',url:'https://github.com/ryxxjyx/copilot-gateway-sync.git'});
+ expect(pkg.homepage).toBe('https://github.com/ryxxjyx/copilot-gateway-sync#readme');
+ expect(pkg.bugs.url).toBe('https://github.com/ryxxjyx/copilot-gateway-sync/issues');
+ const host=readFileSync(__dirname+'/../tools/host-test.cjs','utf8');
+ expect(host).toContain("getExtension('"+pkg.publisher+'.'+pkg.name+"')");
+ expect(host).not.toContain('local-gateway-tools.copilot-gateway-sync');
+ const readme=readFileSync(__dirname+'/../README.md','utf8');expect(readme).toContain('copilot-gateway-sync-'+pkg.version+'.vsix');
+ expect(readme).toContain('globalState');expect(readme).toContain('SecretStorage');expect(readme).toContain('不会自动迁移');
+});
 test('native settings link targets the contributed and registered management command',()=>{
  const pkg=JSON.parse(readFileSync(__dirname+'/../package.json','utf8'));
  const properties=pkg.contributes.configuration.properties;

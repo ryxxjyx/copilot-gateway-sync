@@ -2,7 +2,7 @@ const vscode=require('vscode'),http=require('node:http'),fs=require('node:fs'),a
 exports.run=async function(){
  const report={vscode:vscode.version},wait=ms=>new Promise(r=>setTimeout(r,ms));let server;
  try{
-  const ext=vscode.extensions.getExtension('local-gateway-tools.copilot-gateway-sync');assert(ext);assert.equal(ext.packageJSON.version,'0.4.4');const api=await ext.activate();report.activated=ext.isActive;report.version=ext.packageJSON.version;
+  const ext=vscode.extensions.getExtension('jiangyx.copilot-gateway-sync');assert(ext);assert.equal(ext.packageJSON.version,'0.4.5');const api=await ext.activate();report.activated=ext.isActive;report.version=ext.packageJSON.version;
   const panelTabs=()=>vscode.window.tabGroups.all.flatMap(g=>g.tabs).filter(t=>t.label==='网关模型管理');
   const description=ext.packageJSON.contributes.configuration.properties['gatewaySync.intervalMinutes'].markdownDescription;assert(description.includes('(command:gatewaySync.open)'));report.settingsCommandLink=true;
   await vscode.commands.executeCommand('gatewaySync.open');await wait(1000);report.panelOpened=panelTabs().length===1;assert(report.panelOpened);

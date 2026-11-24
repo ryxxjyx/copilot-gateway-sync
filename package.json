@@ -2,8 +2,16 @@
   "name": "copilot-gateway-sync",
   "displayName": "Copilot 网关模型同步",
   "description": "通用网关模型管理、选择增删、完整能力检测与思维级别配置。",
-  "version": "0.4.4",
-  "publisher": "local-gateway-tools",
+  "version": "0.4.5",
+  "publisher": "jiangyx",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryxxjyx/copilot-gateway-sync.git"
+  },
+  "homepage": "https://github.com/ryxxjyx/copilot-gateway-sync#readme",
+  "bugs": {
+    "url": "https://github.com/ryxxjyx/copilot-gateway-sync/issues"
+  },
   "license": "MIT",
   "engines": {
     "vscode": "^1.80.0"

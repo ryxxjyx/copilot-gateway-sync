@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5
+
+- Set Marketplace publisher to jiangyx and add repository, homepage and issue links.
+- Update the host-test extension ID to jiangyx.copilot-gateway-sync and add publication metadata regression coverage.
+- Document that the publisher change creates a separate extension identity: old globalState and SecretStorage are not automatically migrated. No storage migration or runtime/default changes are included.
+- Preserve earlier release packages under their original versioned filenames.
+
 ## 0.4.4
 
 - Add an Open Gateway Model Management command link to the native extension settings description; reuse the existing single panel and retain the command-palette entry.
